@@ -1,0 +1,2 @@
+to use this code, you should configure OpenCV 2.3.1 correctly
+don't use OpenCV 2.4.x, because some functions are not included in OpenCV 2.4.x
