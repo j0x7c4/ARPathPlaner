@@ -5,29 +5,17 @@
 
 ppMap::ppMap () {
 }
-
+//initialize
 void ppMap::init (){
-	rect.x = 0;
-	rect.y = 0;
-	rect.width = VIDEO_WIDTH;
-	rect.height = VIDEO_HEIGHT;
-	//initialize
+	rect = Rect(0,0,VIDEO_WIDTH,VIDEO_HEIGHT);
+	//cout<<rect<<endl;
 	subdiv.initDelaunay(rect);
 	img = Mat(cvSize(rect.width,rect.height),CV_MAKE_TYPE(8,3));
-	Vec2f fp;               //This is our point holder
 	for(int i = 0; i < border.size(); i++ )
-	{
-		fp[0] = border[i].x;
-		fp[1] = border[i].y;
-		subdiv.insert(fp);
-	}
-	for ( int i=0; i <obstacles.size() ; i++ ) {
-		for ( int j=0 ; j<obstacles[i].size() ; j++ ) {
-			fp[0] = obstacles[i][j].x;
-			fp[1] = obstacles[i][j].y;
-			subdiv.insert(fp);
-		}
-	}
+		subdiv.insert((Vec2f)border[i]);
+	for ( int i=0; i <obstacles.size() ; i++ )
+		for ( int j=0 ; j<obstacles[i].size() ; j++ )
+			subdiv.insert((Vec2f)obstacles[i][j]);
 }
 void ppMap::createBorder(const vector<ppPoint>& _border) {
 	for ( int i= 0 ; i<_border.size() ; i++ ) {
