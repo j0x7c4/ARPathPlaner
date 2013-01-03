@@ -59,11 +59,9 @@ public:
 };
 class ppMap {
 	//strorage and structure for delaunay subdivsion
-	CvRect        rect;   //Our outer bounding box
-	CvMemStorage* storage;                     //Storage for the Delaunay subdivsion
-	CvSubdiv2D*   subdiv;                      //The subdivision itself
-	IplImage* img;                    
-	CvScalar active_facet_color, delaunay_color, voronoi_color, bkgnd_color;
+	CvRect   rect;   //Our outer bounding box
+	Subdiv2D subdiv;
+	Mat img;                    
 	vector<ppPoint> border;
 	vector<vector<ppPoint>> obstacles;
 public:
