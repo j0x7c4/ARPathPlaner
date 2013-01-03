@@ -3,3 +3,5 @@
 *.suo
 *.opensdf
 *.exe
+ARPathPlaner/*
+x64/*
