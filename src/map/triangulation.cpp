@@ -12,7 +12,7 @@ void onMouse(int event,int x,int y,int flag,void* param){
 	}
 }
 
-int main(int argc,char** argv[])
+int main(int argc,char** argv)
 {
 	ppPoint points[12] = { ppPoint(200,10), ppPoint(550,300), ppPoint(200,550), ppPoint(10,200) ,
 													ppPoint(190,200),ppPoint(220,200), ppPoint(220,230),ppPoint(186,210),
