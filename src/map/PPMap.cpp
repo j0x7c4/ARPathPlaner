@@ -1,44 +1,21 @@
 #include "PPMap.h"
 #include <math.h>
 #define ZERO(x) (fabs(x)<10e-6)
-int mark[VIDEO_HEIGHT][VIDEO_WIDTH];
 
 
 ppMap::ppMap () {
 }
-
+//initialize
 void ppMap::init (){
-	rect.x = 0;
-	rect.y = 0;
-	rect.width = VIDEO_WIDTH;
-	rect.height = VIDEO_HEIGHT;
-	//initialize
-	storage = cvCreateMemStorage(0); 
-	subdiv = cvCreateSubdiv2D(CV_SEQ_KIND_SUBDIV2D,sizeof(*subdiv),
-	sizeof(CvSubdiv2DPoint),sizeof(CvQuadEdge2D),storage);
-	cvInitSubdivDelaunay2D( subdiv, rect ); //rect sets the bounds             
-	img=cvCreateImage(cvSize(rect.width,rect.height),8,3);
-	active_facet_color = CV_RGB( 255, 0, 0 );
-	delaunay_color  = CV_RGB( 0,0,0);
-	voronoi_color = CV_RGB(0, 180, 0);
-	bkgnd_color = CV_RGB(255,255,255);
-	cvSet(img,bkgnd_color,0);
-	CvPoint2D32f fp;               //This is our point holder
+	rect = Rect(0,0,VIDEO_WIDTH,VIDEO_HEIGHT);
+	//cout<<rect<<endl;
+	subdiv.initDelaunay(rect);
+	img = Mat(cvSize(rect.width,rect.height),CV_MAKE_TYPE(8,3));
 	for(int i = 0; i < border.size(); i++ )
-	{
-		fp.x = border[i].x;
-		fp.y = border[i].y;
-		cvSubdivDelaunay2DInsert( subdiv, fp );
-		cvCalcSubdivVoronoi2D( subdiv );  // Fill out Voronoi data in subdiv
-	}
-	for ( int i=0; i <obstacles.size() ; i++ ) {
-		for ( int j=0 ; j<obstacles[i].size() ; j++ ) {
-			fp.x = obstacles[i][j].x;
-			fp.y = obstacles[i][j].y;
-			cvSubdivDelaunay2DInsert( subdiv, fp );
-			cvCalcSubdivVoronoi2D( subdiv );  // Fill out Voronoi data in subdiv
-		}
-	}
+		subdiv.insert((Vec2f)border[i]);
+	for ( int i=0; i <obstacles.size() ; i++ )
+		for ( int j=0 ; j<obstacles[i].size() ; j++ )
+			subdiv.insert((Vec2f)obstacles[i][j]);
 }
 void ppMap::createBorder(const vector<ppPoint>& _border) {
 	for ( int i= 0 ; i<_border.size() ; i++ ) {
@@ -54,26 +31,6 @@ void ppMap::addMapBlock ( ppMapBlock block ) {
 	blocks.push_back(block);
 }
 
-//get subdiv edge-ends
-void get_subdiv_edge( CvSubdiv2DEdge edge, ppPoint & iorg, ppPoint& idst )
-{
-	CvSubdiv2DPoint* org_pt;
-	CvSubdiv2DPoint* dst_pt;
-	CvPoint2D32f org;
-	CvPoint2D32f dst;
-
-	org_pt = cvSubdiv2DEdgeOrg(edge);
-	dst_pt = cvSubdiv2DEdgeDst(edge);
-
-	if( org_pt && dst_pt )
-	{
-		org = org_pt->pt;
-		dst = dst_pt->pt;
-
-		iorg = ppPoint( cvRound( org.x ), cvRound( org.y ));
-		idst = ppPoint( cvRound( dst.x ), cvRound( dst.y ));
-	}
-}
 //two blocks is connected
 bool isConnected ( const ppMapBlock& b1,const  ppMapBlock& b2 ) {
 	if ( b1.flag == 1 || b2.flag == 1 ) return false; //obstacle 
@@ -141,61 +98,22 @@ bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p ) {
 	}
 	return false;
 }
- void ppMap::createMap() {
-	CvSeqReader  reader;
-	int total = subdiv->edges->total;
-	int elem_size = subdiv->edges->elem_size;
-	vector<ppEdge> edges;
-	vector<ppPoint> points;
+
+void ppMap::createMap() {
+	vector<Vec6f> triangles;
+
+	subdiv.getTriangleList(triangles);
 	
-	int cnt = 0;
-	memset(mark,0,sizeof(mark));
-
-	cvStartReadSeq( (CvSeq*)(subdiv->edges), &reader, 0 );
-
-	for( int i = 0; i < total; i++ )
-	{
-		CvQuadEdge2D* edge = (CvQuadEdge2D*)(reader.ptr);
-		if( CV_IS_SET_ELEM( edge ))
-		{
-			ppPoint org,dst;
-			get_subdiv_edge( (CvSubdiv2DEdge)edge,org,dst);
-			if ( isInRegion(border,org) && isInRegion(border,dst) ) {
-				if ( !mark[org.x][org.y] ) {
-					mark[org.x][org.y] = org.tag = ++cnt;
-					points.push_back(org);
-				}
-				else{
-					org.tag = mark[org.x][org.y];
-				}
-				if ( !mark[dst.x][dst.y] ) {
-					mark[dst.x][dst.y] = dst.tag = ++cnt;
-					points.push_back(dst);
-				}
-				else{
-					dst.tag = mark[dst.x][dst.y];
-				}
-				printf ("(%d,%d),(%d,%d)\n",org.x,org.y,dst.x,dst.y);
-				edges.push_back(ppEdge(org,dst));
-			}
-		}
-		CV_NEXT_SEQ_ELEM( elem_size, reader );
-	}
-	vector<vector<bool>> graph(cnt+1,vector<bool>(cnt+1,false));
 	int nblock=0;
-	for ( int i=0 ; i<edges.size() ; i++ ) {
-		int p,q;
-		p = edges[i].src.tag;
-		q = edges[i].dst.tag;
-		graph[p][q]=graph[q][p] = true;
-		for ( int j=1 ; j<=cnt ; j++ ) {
-			if ( j==p || j==q ) continue;
-			if ( graph[p][j] && graph[j][q] ) {
-				blocks.push_back(ppMapBlock(points[p-1],points[q-1],points[j-1],nblock++));
-				if ( isObstacle(blocks[nblock-1],obstacles) ) {
-					blocks[nblock-1].flag = 1;
-				}
-			}
+	for ( int i=0 ; i<triangles.size() ; i++ ) {
+		if ( isInRegion(border,ppPoint(triangles[i][0],triangles[i][1])) &&
+				 isInRegion(border,ppPoint(triangles[i][2],triangles[i][3])) &&
+				 isInRegion(border,ppPoint(triangles[i][4],triangles[i][5])) ) {
+			blocks.push_back(ppMapBlock(ppPoint(triangles[i][0],triangles[i][1]),
+																ppPoint(triangles[i][2],triangles[i][3]),
+																ppPoint(triangles[i][4],triangles[i][5]),nblock++));
+			if ( isObstacle(blocks[nblock-1],obstacles) )
+				blocks[nblock-1].flag = 1;
 		}
 	}
 	map.resize(blocks.size(),vector<int>(blocks.size(),0));
@@ -216,9 +134,8 @@ bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p ) {
 			plains.push_back(blocks[i]);
 		}
 	}
-	drawBlock(Mat(img,0),plains,cvScalar(255,255,187));
-	drawBlock(Mat(img,0),obstacles,cvScalar(34,34,178));
-	printf("total edge:%d\n",edges.size());
+	drawBlock(img,plains,cvScalar(255,255,187));
+	drawBlock(img,obstacles,cvScalar(34,34,178));
 	printf("total blocks:%d\n",blocks.size());
 	for ( int i=0 ; i<map.size() ; i++ ) {
 		for ( int j=0 ; j<map[i].size(); j++ ) {
@@ -227,12 +144,10 @@ bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p ) {
 		printf("\n");
 	}
 }
-
  Mat ppMap::getImage() {
-	return Mat(img,1);
+	 return img.clone();
  }
  
  ppMap::~ppMap (){
-	cvReleaseMemStorage( &storage );
-	cvReleaseImage(&img);
+
  }

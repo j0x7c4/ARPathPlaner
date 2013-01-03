@@ -1,27 +1,42 @@
 #include <vector>
-#include <cv.h>
+#include <opencv2/opencv.hpp>
 #include <math.h>
 using namespace std;
 using namespace cv;
 #define VIDEO_WIDTH 600
 #define VIDEO_HEIGHT 600
 
-class ppPoint{
+class ppPoint:public Vec2i{
 public:
-	int tag,x,y;
+	int tag;
 	ppPoint(){
-		x=y=tag=0;
+		this->val[0] = this->val[1]= tag = 0;
 	}
-	ppPoint(int tx,int ty, int ttag=0) { 
-		x=tx;y=ty;
-		tag = ttag;
+	ppPoint(int x,int y, int tag=0) { 
+		this->val[0] = x ;
+		this->val[1] = y;
+		this->tag = tag;
+	}
+	void putX ( int x ) {
+		this->val[0] = x;
+	}
+	void putY ( int y ) {
+		this->val[1] = y;
+	}
+	int getX ( ) const {
+		return this->val[0];
+	}
+	int getY ( ) const {
+		return this->val[1];
 	}
 	bool operator == (const ppPoint& p)const {
-		return p.x==x && p.y==y;
+		return p.x==this->val[0] && p.y==this->val[1];
 	}
 	bool operator == (ppPoint& p)const {
-		return p.x==x && p.y==y;
+		return p.x==this->val[0] && p.y==this->val[1];
 	}
+	__declspec(property(get = getX, put = putX)) int x;
+	__declspec(property(get = getY, put = putY)) int y;
 };
 class ppEdge{
 public:
@@ -59,11 +74,9 @@ public:
 };
 class ppMap {
 	//strorage and structure for delaunay subdivsion
-	CvRect        rect;   //Our outer bounding box
-	CvMemStorage* storage;                     //Storage for the Delaunay subdivsion
-	CvSubdiv2D*   subdiv;                      //The subdivision itself
-	IplImage* img;                    
-	CvScalar active_facet_color, delaunay_color, voronoi_color, bkgnd_color;
+	Rect   rect;   //Our outer bounding box
+	Subdiv2D subdiv;
+	Mat img;                    
 	vector<ppPoint> border;
 	vector<vector<ppPoint>> obstacles;
 public:

@@ -1,18 +1,12 @@
-#include <cv.h>
-#include <highgui.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include "PPMap.h"
 using namespace std;
 using namespace cv;
 
 ppMap ppmap;
 
-void onMouse(int event,int x,int y,int flag,void* param){
-	if ( event == CV_EVENT_LBUTTONUP ) {
-		printf("%d %d\n",x,y);
-	}
-}
-
-int main(int argc,char** argv[])
+int main(int argc,char** argv)
 {
 	ppPoint points[12] = { ppPoint(200,10), ppPoint(550,300), ppPoint(200,550), ppPoint(10,200) ,
 													ppPoint(190,200),ppPoint(220,200), ppPoint(220,230),ppPoint(186,210),
@@ -27,10 +21,7 @@ int main(int argc,char** argv[])
 	ppmap.init();
 	ppmap.createMap();
 	Mat image = ppmap.getImage();
-	imshow("Delaunay",image);
+  imshow("Delaunay",image);
 	waitKey(0);
-
-	cvDestroyWindow("Delaunay");
-
 	return 0;
 }
