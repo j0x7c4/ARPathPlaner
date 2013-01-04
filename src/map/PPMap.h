@@ -17,16 +17,16 @@ public:
 		this->val[1] = y;
 		this->tag = tag;
 	}
-	void putX ( int x ) {
+	inline void putX ( int x ) {
 		this->val[0] = x;
 	}
-	void putY ( int y ) {
+	inline void putY ( int y ) {
 		this->val[1] = y;
 	}
-	int getX ( ) const {
+	inline int getX ( ) const {
 		return this->val[0];
 	}
-	int getY ( ) const {
+	inline int getY ( ) const {
 		return this->val[1];
 	}
 	bool operator == (const ppPoint& p)const {

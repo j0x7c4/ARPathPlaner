@@ -1,6 +1,7 @@
 #include "PPMap.h"
 #include <math.h>
 #define ZERO(x) (fabs(x)<10e-6)
+int mark[VIDEO_HEIGHT][VIDEO_WIDTH];
 
 
 ppMap::ppMap () {
@@ -10,12 +11,21 @@ void ppMap::init (){
 	rect = Rect(0,0,VIDEO_WIDTH,VIDEO_HEIGHT);
 	//cout<<rect<<endl;
 	subdiv.initDelaunay(rect);
-	img = Mat(cvSize(rect.width,rect.height),CV_MAKE_TYPE(8,3));
+	img = Mat(cvSize(rect.width,rect.height),8,3);
+	Vec2f fp;               //This is our point holder
 	for(int i = 0; i < border.size(); i++ )
-		subdiv.insert((Vec2f)border[i]);
-	for ( int i=0; i <obstacles.size() ; i++ )
-		for ( int j=0 ; j<obstacles[i].size() ; j++ )
-			subdiv.insert((Vec2f)obstacles[i][j]);
+	{
+		fp[0] = border[i].x;
+		fp[1] = border[i].y;
+		subdiv.insert(fp);
+	}
+	for ( int i=0; i <obstacles.size() ; i++ ) {
+		for ( int j=0 ; j<obstacles[i].size() ; j++ ) {
+			fp[0] = border[i].x;
+			fp[1] = border[i].y;
+			subdiv.insert(fp);
+		}
+	}
 }
 void ppMap::createBorder(const vector<ppPoint>& _border) {
 	for ( int i= 0 ; i<_border.size() ; i++ ) {
@@ -100,6 +110,7 @@ bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p ) {
 }
 
 void ppMap::createMap() {
+	CvSeqReader  reader;
 	vector<Vec6f> triangles;
 
 	subdiv.getTriangleList(triangles);
