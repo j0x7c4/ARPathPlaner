@@ -1,0 +1,63 @@
+﻿Build started 2013/1/4 23:56:06.
+     1>Project "E:\source\ARPathPlaner\ar\ar.vcxproj" on node 2 (Build target(s)).
+     1>InitializeBuildStatus:
+         Creating "x64\Release\ar.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc110.pdb" /Gd /TP /errorReport:prompt ..\src\ar\utils\aruco_test.cpp
+         aruco_test.cpp
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(58): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(64): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(79): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(82): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(86): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(90): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(107): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(119): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(125): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\cameraparameters.h(126): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\marker.h(76): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\marker.h(83): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\marker.h(88): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\marker.h(100): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\markerdetector.h(86): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\markerdetector.h(97): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\markerdetector.h(163): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\markerdetector.h(226): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\markerdetector.h(246): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\markerdetector.h(269): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\markerdetector.h(274): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\board.h(89): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\board.h(92): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\board.h(108): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\board.h(115): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\board.h(118): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\board.h(143): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\board.h(155): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\board.h(160): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\board.h(163): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\boarddetector.h(83): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\boarddetector.h(108): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>e:\source\arpathplaner\src\ar\boarddetector.h(109): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+     1>..\src\ar\utils\aruco_test.cpp(70): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>..\src\ar\utils\aruco_test.cpp(123): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>..\src\ar\utils\aruco_test.cpp(124): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"E:\source\ARPathPlaner\x64\Release\ar.exe" /INCREMENTAL:NO /NOLOGO opencv_core243.lib opencv_highgui243.lib opencv_imgproc243.lib opencv_calib3d243.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\source\ARPathPlaner\x64\Release\ar.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\source\ARPathPlaner\x64\Release\ar.lib" /MACHINE:X64 x64\Release\arucofidmarkers.obj
+         x64\Release\board.obj
+         x64\Release\boarddetector.obj
+         x64\Release\cameraparameters.obj
+         x64\Release\cvdrawingutils.obj
+         x64\Release\marker.obj
+         x64\Release\markerdetector.obj
+         x64\Release\aruco_test.obj
+         Generating code
+         Finished generating code
+         ar.vcxproj -> E:\source\ARPathPlaner\x64\Release\ar.exe
+       FinalizeBuildStatus:
+         Deleting file "x64\Release\ar.unsuccessfulbuild".
+         Touching "x64\Release\ar.lastbuildstate".
+     1>Done Building Project "E:\source\ARPathPlaner\ar\ar.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.52

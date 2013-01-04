@@ -4,4 +4,6 @@
 *.opensdf
 *.exe
 ARPathPlaner/*
+ar/*
 x64/*
+src/ar/utils/*
