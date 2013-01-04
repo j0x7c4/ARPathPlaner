@@ -38,8 +38,8 @@ bool isConnected ( const ppMapBlock& b1,const  ppMapBlock& b2 ) {
 		for ( int j=i+1 ; j<b1.points.size() ; j++ ) {
 			for ( int p = 0 ; p<b2.points.size()-1 ; p++ ) {
 				for ( int q = p+1 ; q<b2.points.size() ; q++ ) {
-					if ((b1.points[i] == b2.points[p] && b1.points[j] == b2.points[q]) ||
-						(b1.points[j] ==  b2.points[p] && b1.points[i] ==  b2.points[q]) ) {
+					if (b1.points[i] == b2.points[p] && b1.points[j] == b2.points[q] || 
+						b1.points[j] ==  b2.points[p] && b1.points[i] ==  b2.points[q] ) {
 						return true;
 					}
 				}
