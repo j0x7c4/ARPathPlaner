@@ -149,7 +149,6 @@ void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<i
   }
 }
 void ppMap::createMap() {
-	CvSeqReader  reader;
 	vector<Vec6f> triangles;
   vector<ppMapBlock> tempBlocks;
   vector<vector<int>> tempMap;
