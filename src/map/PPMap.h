@@ -76,15 +76,15 @@ class ppMap {
 	Subdiv2D subdiv;
 	Mat img;                    
 	vector<ppPoint> border;
-	vector<vector<ppPoint>> obstacles;
+	vector<vector<ppPoint> > obstacles;
 public:
 	void init();
 	vector<ppMapBlock> blocks;
 	ppMap();
 	~ppMap();
-	vector<vector<int>> map;
+	vector<vector<int> > map;
 	void createBorder(const vector<ppPoint>& _border);
-	void createObstacles(const vector<vector<ppPoint>>& _obstacles); 
+	void createObstacles(const vector<vector<ppPoint> >& _obstacles); 
 	void addMapBlock(ppMapBlock block);
 	void createMap ();
 	Mat getImage();

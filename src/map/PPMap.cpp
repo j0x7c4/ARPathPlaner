@@ -30,7 +30,7 @@ void ppMap::createBorder(const vector<ppPoint>& _border) {
 		border.push_back(_border[i]);
 	}
 }
-void ppMap::createObstacles(const vector<vector<ppPoint>>& _obstacles) {
+void ppMap::createObstacles(const vector<vector<ppPoint> >& _obstacles) {
 	for ( int i=0 ; i<_obstacles.size() ; i++ ) {
 		obstacles.push_back(vector<ppPoint>(_obstacles[i].begin(),_obstacles[i].end()));
 	}
@@ -67,7 +67,7 @@ bool onLine ( const ppPoint& a,const ppPoint& b, const ppPoint& c) {
 	float b1 = b.x - a.x, b2 = -b.y+a.y;//the y-coordinate in opencv is inversed
 	return ZERO(a1*b2 - a2*b1);
 }
-bool isObstacle ( const ppMapBlock& b , const vector<vector<ppPoint>>& obstacles) {
+bool isObstacle ( const ppMapBlock& b , const vector<vector<ppPoint> >& obstacles) {
 	int j;
 	for ( int i=0 ; i<obstacles.size() ; i++ ) {
 		int n = obstacles[i].size();
@@ -81,7 +81,7 @@ bool isObstacle ( const ppMapBlock& b , const vector<vector<ppPoint>>& obstacles
 }
 void drawBlock ( Mat& image, const vector<ppMapBlock>& blocks, CvScalar color ){
 	char str[10];
-	vector<vector<Point>> pts;
+	vector<vector<Point> > pts;
 	for ( int i=0 ; i<blocks.size() ; i++ ) {
 		vector<Point> curve;
 		for ( int j = 0 ; j<blocks[i].points.size() ; j++ ) {
@@ -128,7 +128,7 @@ bool merge ( const ppMapBlock& t1, const ppMapBlock& t2 , ppMapBlock& block) {
 	}
 	return false;
 }
-void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<int>>& map, vector<ppMapBlock>& blocks ) {
+void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<int> >& map, vector<ppMapBlock>& blocks ) {
   int n = triangels.size();
   vector<int> mark(n,0);
   for ( int i=0 ; i<n ; i++ ) {
@@ -151,7 +151,7 @@ void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<i
 void ppMap::createMap() {
 	vector<Vec6f> triangles;
   vector<ppMapBlock> tempBlocks;
-  vector<vector<int>> tempMap;
+  vector<vector<int> > tempMap;
 	int nblock=0;
   subdiv.getTriangleList(triangles);
   //collect temp triangles
