@@ -1,8 +1,6 @@
 #include "PPMap.h"
 #include <math.h>
 #define ZERO(x) (fabs(x)<10e-6)
-int mark[VIDEO_HEIGHT][VIDEO_WIDTH];
-
 
 ppMap::ppMap () {
 }
@@ -11,7 +9,7 @@ void ppMap::init (){
 	rect = Rect(0,0,VIDEO_WIDTH,VIDEO_HEIGHT);
 	//cout<<rect<<endl;
 	subdiv.initDelaunay(rect);
-	img = Mat(cvSize(rect.width,rect.height),8,3);
+	img = Mat(cvSize(rect.width,rect.height),CV_MAKE_TYPE(8,3));
 	Vec2f fp;               //This is our point holder
 	for(int i = 0; i < border.size(); i++ )
 	{
@@ -21,8 +19,8 @@ void ppMap::init (){
 	}
 	for ( int i=0; i <obstacles.size() ; i++ ) {
 		for ( int j=0 ; j<obstacles[i].size() ; j++ ) {
-			fp[0] = border[i].x;
-			fp[1] = border[i].y;
+			fp[0] = obstacles[i][j].x;
+			fp[1] = obstacles[i][j].y;
 			subdiv.insert(fp);
 		}
 	}
@@ -48,8 +46,8 @@ bool isConnected ( const ppMapBlock& b1,const  ppMapBlock& b2 ) {
 		for ( int j=i+1 ; j<b1.points.size() ; j++ ) {
 			for ( int p = 0 ; p<b2.points.size()-1 ; p++ ) {
 				for ( int q = p+1 ; q<b2.points.size() ; q++ ) {
-					if (b1.points[i] == b2.points[p] && b1.points[j] == b2.points[q] || 
-						b1.points[j] ==  b2.points[p] && b1.points[i] ==  b2.points[q] ) {
+					if ((b1.points[i] == b2.points[p] && b1.points[j] == b2.points[q]) ||
+						(b1.points[j] ==  b2.points[p] && b1.points[i] ==  b2.points[q]) ) {
 						return true;
 					}
 				}
