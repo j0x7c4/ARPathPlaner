@@ -106,33 +106,43 @@ bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p ) {
 	}
 	return false;
 }
-
+//merge temp triangles
+void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<int>>& map, vector<vector<ppMapBlock>>& blocks ) {
+  vector<vector<Vec2f>> convexHullPts;
+  int n = triangels.size();
+  vector<int> mark(n,-1);
+  for ( int i=0 ; i<n ; i++ ) {
+    
+  }
+}
 void ppMap::createMap() {
 	CvSeqReader  reader;
 	vector<Vec6f> triangles;
-
-	subdiv.getTriangleList(triangles);
-	
+  vector<ppMapBlock> tempBlocks;
+  vector<vector<int>> tempMap;
 	int nblock=0;
+  subdiv.getTriangleList(triangles);
+  //collect temp triangles
 	for ( int i=0 ; i<triangles.size() ; i++ ) {
 		if ( isInRegion(border,ppPoint(triangles[i][0],triangles[i][1])) &&
 				 isInRegion(border,ppPoint(triangles[i][2],triangles[i][3])) &&
 				 isInRegion(border,ppPoint(triangles[i][4],triangles[i][5])) ) {
-			blocks.push_back(ppMapBlock(ppPoint(triangles[i][0],triangles[i][1]),
+			tempBlocks.push_back(ppMapBlock(ppPoint(triangles[i][0],triangles[i][1]),
 																ppPoint(triangles[i][2],triangles[i][3]),
 																ppPoint(triangles[i][4],triangles[i][5]),nblock++));
-			if ( isObstacle(blocks[nblock-1],obstacles) )
-				blocks[nblock-1].flag = 1;
+			if ( isObstacle(tempBlocks[nblock-1],obstacles) )
+				tempBlocks[nblock-1].flag = 1;
 		}
 	}
-	map.resize(blocks.size(),vector<int>(blocks.size(),0));
-	for ( int i=0 ; i<blocks.size() ; i++ ) {
-		for ( int j=i+1 ; j<blocks.size() ; j++ ) {
-			if ( isConnected(blocks[i],blocks[j]) ) {
-				map[i][j] = map[j][i] = 1;
+	tempMap.resize(tempBlocks.size(),vector<int>(tempBlocks.size(),0));
+	for ( int i=0 ; i<tempBlocks.size() ; i++ ) {
+		for ( int j=i+1 ; j<tempBlocks.size() ; j++ ) {
+			if ( isConnected(tempBlocks[i],tempBlocks[j]) ) {
+				tempMap[i][j] = tempMap[j][i] = 1;
 			}
 		}
 	}
+  
 	vector<ppMapBlock> plains;
 	vector<ppMapBlock> obstacles;
 	for (int i=0 ; i<blocks.size(); i++ ) {
@@ -145,7 +155,7 @@ void ppMap::createMap() {
 	}
 	drawBlock(img,plains,cvScalar(255,255,187));
 	drawBlock(img,obstacles,cvScalar(34,34,178));
-	printf("total blocks:%d\n",blocks.size());
+	//printf("total blocks:%d\n",blocks.size());
 	for ( int i=0 ; i<map.size() ; i++ ) {
 		for ( int j=0 ; j<map[i].size(); j++ ) {
 			printf("%d",map[i][j]);

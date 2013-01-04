@@ -58,6 +58,13 @@ public:
 		center.y = (a.y*la)/(la+lb+lc)+(b.y*lb)/(la+lb+lc)+(c.y*lc)/(la+lb+lc);
 		flag = tflag;
 	}
+  ppMapBlock(const vector<ppPoint>& pts, int tag=0, int flag=0 ) {
+    this->tag = tag;
+    this->flag = flag;
+    for ( int i= 0 ; i<pts.size() ; i++ ) {
+      points.push_back(pts[i]);
+    }
+  }
 };
 class ppMap {
 	//strorage and structure for delaunay subdivsion
