@@ -59,11 +59,15 @@ public:
 		flag = tflag;
 	}
   ppMapBlock(const vector<ppPoint>& pts, int tag=0, int flag=0 ) {
-    this->tag = tag;
+    float x=0,y=0;
+		this->tag = tag;
     this->flag = flag;
     for ( int i= 0 ; i<pts.size() ; i++ ) {
       points.push_back(pts[i]);
+			x+=pts[i].x;
+			y+=pts[i].y;
     }
+		this->center = ppPoint(x/pts.size(),y/pts.size());
   }
 };
 class ppMap {

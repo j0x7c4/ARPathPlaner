@@ -41,7 +41,6 @@ void ppMap::addMapBlock ( ppMapBlock block ) {
 
 //two blocks is connected
 bool isConnected ( const ppMapBlock& b1,const  ppMapBlock& b2 ) {
-	if ( b1.flag == 1 || b2.flag == 1 ) return false; //obstacle 
 	for ( int i=0 ; i<b1.points.size()-1 ; i++ ) {
 		for ( int j=i+1 ; j<b1.points.size() ; j++ ) {
 			for ( int p = 0 ; p<b2.points.size()-1 ; p++ ) {
@@ -106,13 +105,47 @@ bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p ) {
 	}
 	return false;
 }
+
 //merge temp triangles
-void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<int>>& map, vector<vector<ppMapBlock>>& blocks ) {
-  vector<vector<Vec2f>> convexHullPts;
+bool merge ( const ppMapBlock& t1, const ppMapBlock& t2 , ppMapBlock& block) {
+	vector<Point2f> convexHullPts;
+	vector<int> idx;
+	for ( int i=0 ; i<t1.points.size(); i++) {
+		convexHullPts.push_back(Point2f(t1.points[i].x,t1.points[i].y));
+	}
+	for ( int i=0 ; i<t2.points.size(); i++) {
+		convexHullPts.push_back(Point2f(t2.points[i].x,t2.points[i].y));
+	}
+	convexHull(convexHullPts,idx,true,false);
+	//the two triangles can be merged into convex quad-, iff the #vert. in convex hull is 4
+	if ( idx.size() == 4 ) {
+		vector<ppPoint> pts;
+		for ( int i=0 ; i<idx.size() ; i++ ) {
+			pts.push_back(ppPoint(convexHullPts[idx[i]].x,convexHullPts[idx[i]].y));
+		}
+		block = ppMapBlock(pts,0,t1.flag);
+		return true;
+	}
+	return false;
+}
+void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<int>>& map, vector<ppMapBlock>& blocks ) {
   int n = triangels.size();
-  vector<int> mark(n,-1);
+  vector<int> mark(n,0);
   for ( int i=0 ; i<n ; i++ ) {
-    
+    if (!mark[i]) {
+			int j;
+			for ( j=i+1 ; j<n; j++ ) {
+				if ( !mark[j] && map[i][j]==1 ) {
+					ppMapBlock block;
+					if ( merge(triangels[i],triangels[j],block) ) {
+						mark[j] = 1;
+						blocks.push_back(block);
+						break;
+					}
+				}
+			}
+			if ( j>=n ) blocks.push_back(triangels[i]);
+		}
   }
 }
 void ppMap::createMap() {
@@ -138,11 +171,25 @@ void ppMap::createMap() {
 	for ( int i=0 ; i<tempBlocks.size() ; i++ ) {
 		for ( int j=i+1 ; j<tempBlocks.size() ; j++ ) {
 			if ( isConnected(tempBlocks[i],tempBlocks[j]) ) {
-				tempMap[i][j] = tempMap[j][i] = 1;
+				if ( tempBlocks[i].flag != tempBlocks[j].flag ) {
+					tempMap[i][j] = tempMap[j][i] = 2; //plain and obstecal
+				}
+				else {
+					tempMap[i][j] = tempMap[j][i] = 1; // plain and plain or  obstecal and obstecal
+				}
 			}
 		}
 	}
-  
+	mergeTriangles(tempBlocks,tempMap,blocks);
+	map.resize(blocks.size(),vector<int>(blocks.size(),0));
+	for ( int i=0 ; i<blocks.size() ; i++ ) {
+		blocks[i].tag = i;
+		for ( int j=i+1 ; j<blocks.size() ; j++ ) {
+			if ( isConnected(blocks[i],blocks[j]) && blocks[i].flag==blocks[j].flag ) {
+				map[i][j] = map[j][i] = 1;
+			}
+		}
+	}
 	vector<ppMapBlock> plains;
 	vector<ppMapBlock> obstacles;
 	for (int i=0 ; i<blocks.size(); i++ ) {
@@ -155,7 +202,7 @@ void ppMap::createMap() {
 	}
 	drawBlock(img,plains,cvScalar(255,255,187));
 	drawBlock(img,obstacles,cvScalar(34,34,178));
-	//printf("total blocks:%d\n",blocks.size());
+	printf("total blocks:%d\n",blocks.size());
 	for ( int i=0 ; i<map.size() ; i++ ) {
 		for ( int j=0 ; j<map[i].size(); j++ ) {
 			printf("%d",map[i][j]);
