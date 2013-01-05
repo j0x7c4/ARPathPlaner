@@ -21,6 +21,16 @@ int main(int argc,char** argv)
 	ppmap.createObstacles(obstacles);
 	ppmap.init();
 	ppmap.createMap();
+	//test all vertex of blocks is clockwise
+	for ( int i=0 ; i<ppmap.blocks.size(); i++ ) {
+		if ( !isInRegion(ppmap.blocks[i].points,ppmap.blocks[i].center) ) {
+			printf("%d NOOOO!\n",i);
+			printf("%d,%d\n",ppmap.blocks[i].center.x,ppmap.blocks[i].center.y);
+			for ( int j=0 ; j<ppmap.blocks[i].points.size() ; j++ ) {
+				printf("%d,%d\n",ppmap.blocks[i].points[j].x,ppmap.blocks[i].points[j].y);
+			}
+		}
+	}
 	Mat image = ppmap.getImage();
   imshow("Delaunay",image);
 	waitKey(0);

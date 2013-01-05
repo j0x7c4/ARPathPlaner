@@ -120,7 +120,7 @@ bool merge ( const ppMapBlock& t1, const ppMapBlock& t2 , ppMapBlock& block) {
 	//the two triangles can be merged into convex quad-, iff the #vert. in convex hull is 4
 	if ( idx.size() == 4 ) {
 		vector<ppPoint> pts;
-		for ( int i=0 ; i<idx.size() ; i++ ) {
+		for ( int i=idx.size()-1 ; i>=0 ; i-- ) {
 			pts.push_back(ppPoint(convexHullPts[idx[i]].x,convexHullPts[idx[i]].y));
 		}
 		block = ppMapBlock(pts,0,t1.flag);
@@ -144,7 +144,15 @@ void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<i
 					}
 				}
 			}
-			if ( j>=n ) blocks.push_back(triangels[i]);
+			if ( j>=n ) {
+				vector<Point2f> convexHullPts;
+				vector<int> idx;
+				for ( int i=2 ; i>=0; i--) {
+					convexHullPts.push_back(Point2f(triangels[i].points[i].x,triangels[i].points[i].y));
+				}
+				convexHull(convexHullPts,idx,true,false);
+				blocks.push_back(ppMapBlock(triangels[i].points[idx[0]],triangels[i].points[idx[1]],triangels[i].points[idx[2]]));
+			}
 		}
   }
 }

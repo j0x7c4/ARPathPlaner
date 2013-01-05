@@ -89,3 +89,6 @@ public:
 	void createMap ();
 	Mat getImage();
 };
+
+bool onRight ( const ppPoint& a,const ppPoint& b, const ppPoint& c);
+bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p );
