@@ -3,14 +3,17 @@
 #define ZERO(x) (fabs(x)<10e-6)
 
 ppMap::ppMap () {
+  ppMap(VIDEO_WIDTH,VIDEO_HEIGHT);
+}
+ppMap::ppMap ( int width , int height ) {
+  rect = Rect(0,0,width,height);
+  img = Mat(cvSize(width,height),CV_MAKE_TYPE(8,3));
+  img.setTo(0);
 }
 //initialize
 void ppMap::init (){
-	rect = Rect(0,0,VIDEO_WIDTH,VIDEO_HEIGHT);
-	//cout<<rect<<endl;
-	subdiv.initDelaunay(rect);
-	img = Mat(cvSize(rect.width,rect.height),CV_MAKE_TYPE(8,3));
-	Vec2f fp;               //This is our point holder
+  Vec2f fp;               //This is our point holder
+  subdiv.initDelaunay(rect);
 	for(int i = 0; i < border.size(); i++ )
 	{
 		fp[0] = border[i].x;
@@ -26,12 +29,14 @@ void ppMap::init (){
 	}
 }
 void ppMap::createBorder(const vector<ppPoint>& _border) {
+  border.clear();
 	for ( int i= 0 ; i<_border.size() ; i++ ) {
 		border.push_back(_border[i]);
 	}
 }
 void ppMap::createObstacles(const vector<vector<ppPoint> >& _obstacles) {
-	for ( int i=0 ; i<_obstacles.size() ; i++ ) {
+	obstacles.clear();
+  for ( int i=0 ; i<_obstacles.size() ; i++ ) {
 		obstacles.push_back(vector<ppPoint>(_obstacles[i].begin(),_obstacles[i].end()));
 	}
 }

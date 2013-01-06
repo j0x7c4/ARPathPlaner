@@ -3,8 +3,8 @@
 #include <math.h>
 using namespace std;
 using namespace cv;
-#define VIDEO_WIDTH 600
-#define VIDEO_HEIGHT 600
+#define VIDEO_WIDTH 1000
+#define VIDEO_HEIGHT 1000
 
 class ppPoint{
 public:
@@ -81,6 +81,7 @@ public:
 	void init();
 	vector<ppMapBlock> blocks;
 	ppMap();
+  ppMap(int width, int height);
 	~ppMap();
 	vector<vector<int> > map;
 	void createBorder(const vector<ppPoint>& _border);

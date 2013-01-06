@@ -4,7 +4,7 @@
 using namespace std;
 using namespace cv;
 
-ppMap ppmap;
+ppMap ppmap(800,600);
 
 
 int main(int argc,char** argv)
@@ -14,7 +14,7 @@ int main(int argc,char** argv)
 												ppPoint(240,200),ppPoint(270,200), ppPoint(270,230),ppPoint(236,210)};
 
 	vector<ppPoint> border(points,points+4);
-	vector<vector<ppPoint>> obstacles;
+	vector<vector<ppPoint> > obstacles;
 	obstacles.push_back(vector<ppPoint>(points+4,points+8));
 	obstacles.push_back(vector<ppPoint>(points+8,points+12));
 	ppmap.createBorder(border);
