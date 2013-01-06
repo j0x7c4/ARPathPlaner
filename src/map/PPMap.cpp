@@ -147,11 +147,11 @@ void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<i
 			if ( j>=n ) {
 				vector<Point2f> convexHullPts;
 				vector<int> idx;
-				for ( int i=2 ; i>=0; i--) {
-					convexHullPts.push_back(Point2f(triangels[i].points[i].x,triangels[i].points[i].y));
+				for ( int k=0 ; k<3; k++) {
+					convexHullPts.push_back(Point2f(triangels[i].points[k].x,triangels[i].points[k].y));
 				}
 				convexHull(convexHullPts,idx,true,false);
-				blocks.push_back(ppMapBlock(triangels[i].points[idx[0]],triangels[i].points[idx[1]],triangels[i].points[idx[2]]));
+				blocks.push_back(ppMapBlock(triangels[i].points[idx[2]],triangels[i].points[idx[1]],triangels[i].points[idx[0]]));
 			}
 		}
   }
@@ -207,6 +207,7 @@ void ppMap::createMap() {
 			plains.push_back(blocks[i]);
 		}
 	}
+  img.setTo(0);
 	drawBlock(img,plains,cvScalar(255,255,187));
 	drawBlock(img,obstacles,cvScalar(34,34,178));
 	printf("total blocks:%d\n",blocks.size());
