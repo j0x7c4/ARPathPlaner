@@ -213,6 +213,7 @@ void ppMap::createMap() {
 		}
 	}
   img.setTo(0);
+  /*
 	drawBlock(img,plains,cvScalar(255,255,187));
 	drawBlock(img,obstacles,cvScalar(34,34,178));
 	printf("total blocks:%d\n",blocks.size());
@@ -222,6 +223,7 @@ void ppMap::createMap() {
 		}
 		printf("\n");
 	}
+   */
 }
  Mat ppMap::getImage() {
 	 return img.clone();
