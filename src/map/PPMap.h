@@ -74,10 +74,11 @@ class ppMap {
 	//strorage and structure for delaunay subdivsion
 	Rect   rect;   //Our outer bounding box
 	Subdiv2D subdiv;
-	Mat img;                    
+	                   
 	vector<ppPoint> border;
 	vector<vector<ppPoint> > obstacles;
 public:
+  Mat img; 
 	void init();
 	vector<ppMapBlock> blocks;
 	ppMap();
