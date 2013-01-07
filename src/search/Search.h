@@ -152,7 +152,7 @@ class Search{
 		}
 		
 		/* draw the path line and push the coordinate into pointPath*/
-		void drawLine( Mat& img){
+		void getRoute(vector<Point2i>& out_path){
 			vector<int> linePoint;
 			int pos1, pos2, x, y;
 			Point p1, p2, p3;
@@ -160,15 +160,13 @@ class Search{
 				p1 = cvPoint(startEnd[0], startEnd[1]); //startPoint
         p2 = exitList[en][0]; //EndPoint
 				pointPath.push_back(p1); 
-				pointPath.push_back(p2);  	
-				line(img, p1, p2, cvScalar(255,0 ,0), 2, 3, 0);
+				pointPath.push_back(p2);
 			}
 			else{
 				p1 = cvPoint(startEnd.at(0), startEnd.at(1)); //startPoint
 				p2 = cvPoint(blocks[st].center.x, blocks[st].center.y); //startBlockCenter
 				pointPath.push_back(p1);
 				pointPath.push_back(p2);	
-				line(img, p1, p2, cvScalar(255,0 ,0), 2, 3, 0);
 			}
 			for(int i = 0; i < path.size(); i++){
 				if(i + 1 < path.size()){ // judge whether next node is the final node
@@ -182,8 +180,6 @@ class Search{
 			 		p3 = cvPoint(blocks[pos2].center.x, blocks[pos2].center.y); // centerOfSecondPoint
 					pointPath.push_back(p2);
 					pointPath.push_back(p3);
-					line(img, p1, p2, cvScalar(255, 0, 0), 2, 3, 0);
-					line(img, p2, p3, cvScalar(255, 0, 0), 2, 3, 0);
 					linePoint.clear();
 				}
 			}
@@ -191,8 +187,8 @@ class Search{
 				p1 = cvPoint(blocks[path.back()].center.x, blocks[path.back()].center.y);
         p2 = exitList[en][0]; //EndPoint;
 				pointPath.push_back(p2);
-				line(img, p1, p2, cvScalar(255, 0, 0), 2, 3, 0);
 			}
+      out_path = vector<Point2i>(pointPath);
 		}
 		
 		/* find the edge between two blocks */
