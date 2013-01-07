@@ -24,6 +24,7 @@ int main(int argc,char** argv)
 	ppmap.createMap();
 	//test all vertex of blocks is clockwise
 	for ( int i=0 ; i<ppmap.blocks.size(); i++ ) {
+    printf("%d %lf\n",i,ppmap.blocks[i].area);
 		if ( !isInRegion(ppmap.blocks[i].points,ppmap.blocks[i].center) ) {
 			printf("%d NOOOO!\n",i);
 			printf("%d,%d\n",ppmap.blocks[i].center.x,ppmap.blocks[i].center.y);

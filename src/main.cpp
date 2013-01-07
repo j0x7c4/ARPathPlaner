@@ -6,6 +6,8 @@
 using namespace cv;
 using namespace aruco;
 
+//#define RECORD_TEST_VIDEO
+//#define RECORD_DEMO_VIDEO
 #define obj 250
 #define bor 1008
 #define en 1000
@@ -14,25 +16,33 @@ using namespace aruco;
 #define MOTION_ENERGY_WINDOW_SIZE 10
 #define MOTION_THRESHOLD 5
 
-#define TEST_VIDEO "test_video_0.avi"
+#define TEST_VIDEO "test_video_3.avi"
 #define IMG_BORDER "border.jpg"
-#define IMG_ENTER "teemo.jpg"
+#define IMG_TEEMO "teemo.jpg"
+#define IMG_ENTER "start.jpg"
 #define IMG_EXIT "exit.jpg"
 #define IMG_EVIL "tree.jpg"
 
-void put_obj(Mat& input, char *name, int x, int y, int size);
+void put_obj(Mat& input, char *name, int x, int y, int size = 80);
 void drawLine(const vector<Point2i>& path, Mat& img);
 double calcEnergy ( const vector<Mat>& clips );
+bool in_ball(Point2f, Point2f, float);
+vector<Point2f> running_teemo(vector<Point> , int);
 
 int motion_state=0;
 
 int main(int argc,char **argv){
 
   VideoWriter video_writer;
-  //video_writer.open("test_video.avi",CV_FOURCC('D','I','V','X'),30,cvSize(800,600),true);
-
-  VideoCapture cap(TEST_VIDEO); // open the default camera
-  cap.set(CV_CAP_PROP_FPS,30);
+  VideoCapture cap("test_video_2.avi");// open the default camera
+#ifdef RECORD_TEST_VIDEO
+  video_writer.open("test_video_2.avi",CV_FOURCC('D','I','V','X'),30,cvSize(800,600),true);
+#endif
+#ifdef RECORD_DEMO_VIDEO
+  video_writer.open("demo_video_tmp.avi",CV_FOURCC('D','I','V','X'),30,cvSize(800,600),true);
+#endif
+  
+  cap.set(CV_CAP_PROP_FPS,60);
   cap.set(CV_CAP_PROP_FRAME_WIDTH ,800);
   cap.set(CV_CAP_PROP_FRAME_HEIGHT,600);
   if(!cap.isOpened())  // check if we succeeded
@@ -46,12 +56,16 @@ int main(int argc,char **argv){
   float MarkerSize=-1;
   //read the input image
   Mat InImage;
-  Mat map_image;
+  Mat map_image(cvSize(800,600),CV_MAKETYPE(8,3));
   int key;
   //read camera parameters if specifed
   int cnt = 0;
-  int reroute = 1;
-  int redetect = 1;
+  int reroute = 0;
+  int redetect = 0;
+  int running = 0;
+  int running_path_idx = 0;
+
+  vector<Point2f> running_path;
   vector<Marker> Markers;
   vector<Point2f> borders; //border
   vector<Marker> Obstacles; //obstacle
@@ -61,11 +75,19 @@ int main(int argc,char **argv){
   double energy = 0;
   vector<Mat> energy_images(MOTION_ENERGY_WINDOW_SIZE,Mat());
   while(cap.read(InImage)){// get a new frame from camera
+#ifdef RECORD_TEST_VIDEO
+    video_writer<<InImage;
+    imshow("RECORD",InImage);
+    if ( waitKey(30)>=0 ) 
+      break;
+    continue;
+    //printf("%d\n",cnt);
+#endif
     if ( cnt == 10000*MOTION_ENERGY_WINDOW_SIZE ) cnt = MOTION_ENERGY_WINDOW_SIZE;
     cvtColor(InImage,energy_images[(++cnt)%MOTION_ENERGY_WINDOW_SIZE],CV_RGB2GRAY);
     if ( cnt >= MOTION_ENERGY_WINDOW_SIZE ) {
       energy = calcEnergy(vector<Mat>(energy_images.begin(),energy_images.end()));
-      printf("Energy: %lf\n",energy);
+      //printf("Energy: %lf\n",energy);
     }
     switch ( motion_state ) {
     case 0:
@@ -86,10 +108,8 @@ int main(int argc,char **argv){
     vector<int> idx;
     ppMap map(800,600);
     
-     
-    //video_writer<<InImage;
-    //printf("%d\n",cnt);
-    
+
+
     if ( redetect ) {
       borders.clear();
       Obstacles.clear();
@@ -125,10 +145,13 @@ int main(int argc,char **argv){
       Markers[i].draw(InImage,Scalar(0,0,255),2);
     }
 
-    if(in_door.x!=0 && in_door.y!=0 )
+    if(in_door.x!=0 && in_door.y!=0 ) {
       put_obj(InImage, IMG_ENTER, in_door.x, in_door.y, 80);
-    //cout << "entry" << "(" << in_door.x << "," << in_door.y << ")" << endl;
-
+      if ( !running ) {
+        put_obj(InImage, IMG_TEEMO, in_door.x, in_door.y, 80);
+      }
+      //cout << "entry" << "(" << in_door.x << "," << in_door.y << ")" << endl;
+    }
     if(borders.size()!=0)
       convexHull(borders,idx,true,false);
 
@@ -166,8 +189,13 @@ int main(int argc,char **argv){
     if ( reroute && map.blocks.size()>0 && enter_flag && exit_flag ) {
       route.clear();
       vector<int> inOut;
-      inOut.push_back(in_door.x);
-      inOut.push_back(in_door.y);
+      if ( running_path_idx<running_path.size() ) {
+        inOut.push_back(running_path[running_path_idx].x);
+        inOut.push_back(running_path[running_path_idx].y);
+      } else {
+        inOut.push_back(in_door.x);
+        inOut.push_back(in_door.y);
+      }
       for ( int i=0 ; i<out_doors.size() ; i++ ) {
         inOut.push_back(out_doors[i].x);
         inOut.push_back(out_doors[i].y);
@@ -175,9 +203,22 @@ int main(int argc,char **argv){
       Search search(inOut, map);
       search.aStar();
       search.getRoute(route);
+      running_path = running_teemo(route,2);
+      running_path_idx = 0;
+      running = 1;
+      //cout<<running_path<<endl;
       reroute = 0;
     }
     drawLine(route,InImage);
+    if ( running ) {
+      put_obj(InImage,IMG_TEEMO,running_path[running_path_idx].x,running_path[running_path_idx].y);
+      running_path_idx++;
+      if ( running_path_idx == running_path.size() )
+        running = 0;
+    }
+#ifdef RECORD_DEMO_VIDEO
+    video_writer<<InImage;
+#endif
     cv::imshow("map",map_image);
     cv::imshow("in",InImage);
     key = waitKey(30);
@@ -216,7 +257,7 @@ double calcEnergy ( const vector<Mat>& clips ) {
   minMaxLoc(m,&min_value,&max_value);
   convertScaleAbs(m,m,255.0/max_value);
   threshold(m,m,128,255,THRESH_BINARY);
-  imshow("energy",m);
+  //imshow("energy",m);
   for ( int i = 0 ; i<m.rows;  i++ ) {
     ptr =(uchar*) m.ptr(i);
     for ( int j = 0 ; j<m.cols; j++ ) {
@@ -231,4 +272,33 @@ void drawLine(const vector<Point2i>& path, Mat& img){
   for ( int i=0 ; i<path.size()-1 ; i++ ) {
     line(img, path[i], path[i+1], cvScalar(255,0 ,0), 2, 3, 0);
   }
+}
+
+vector<Point2f> running_teemo(vector<Point> points, int vel){
+    vector<Point2f> path;
+    path.push_back(points[0]);
+    for(int i=0; i<points.size()-1;i++){
+        Point2f vec(points[i+1].x-points[i].x, points[i+1].y-points[i].y);
+        float len = sqrt(pow(vec.x,2)+pow(vec.y,2));
+        vec.x /= len;
+        vec.y /= len;
+        for(Point2f now(points[i].x+(vec.x*vel),points[i].y+(vec.y*vel)) ; now!=(Point2f)points[i+1]; now.x+=(vec.x*vel), now.y+=(vec.y*vel)){
+            if(in_ball(now, points[i+1], vel)){
+                //cout << "haha" << endl;
+                now = points[i+1];
+                path.push_back(now);
+                break;
+            }
+            //cout << now << endl;
+            path.push_back(now);
+        }
+    }
+    return path;
+}
+
+bool in_ball(Point2f input, Point2f center, float radius){
+    if(pow(input.x-center.x,2)+pow(input.y-center.y,2)<=pow(radius, 2))
+       return true;
+    else
+       return false;
 }

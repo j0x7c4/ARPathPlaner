@@ -5,6 +5,8 @@ using namespace std;
 using namespace cv;
 #define VIDEO_WIDTH 1000
 #define VIDEO_HEIGHT 1000
+#define REGION_THRESHOLD 600
+
 
 class ppPoint{
 public:
@@ -36,8 +38,12 @@ public:
 		src = p1; dst = p2; tag = t;
 	}
 };
+bool onRight ( const ppPoint& a, const ppPoint& b, const ppPoint& c);
+bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p );
+float triangleArea(const ppPoint& a,const ppPoint& b, const ppPoint& c);
 class ppMapBlock {
 public:
+  float area;
 	vector<ppPoint> points;
 	ppPoint center;
 	int tag;
@@ -54,6 +60,7 @@ public:
 		double la = sqrt((double)((b.x-c.x)*(b.x-c.x)+(b.y-c.y)*(b.y-c.y)));
 		double lb = sqrt((double)((a.x-c.x)*(a.x-c.x)+(a.y-c.y)*(a.y-c.y)));
 		double lc = sqrt((double)((b.x-a.x)*(b.x-a.x)+(b.y-a.y)*(b.y-a.y)));
+    area = triangleArea(a,b,c);
 		center.x = (a.x*la)/(la+lb+lc)+(b.x*lb)/(la+lb+lc)+(c.x*lc)/(la+lb+lc);
 		center.y = (a.y*la)/(la+lb+lc)+(b.y*lb)/(la+lb+lc)+(c.y*lc)/(la+lb+lc);
 		flag = tflag;
@@ -68,15 +75,20 @@ public:
 			y+=pts[i].y;
     }
 		this->center = ppPoint(x/pts.size(),y/pts.size());
+    this->area = triangleArea(pts[0],pts[1],pts[2]) + triangleArea(pts[0],pts[3],pts[2]);
   }
 };
+
+
+void mergeSmallBlockAsObstacle(vector<ppMapBlock>& blocks, vector<vector<int> >& map);
+
 class ppMap {
 	//strorage and structure for delaunay subdivsion
 	Rect   rect;   //Our outer bounding box
 	Subdiv2D subdiv;
 	                   
 	vector<ppPoint> border;
-	vector<vector<ppPoint> > obstacles;
+	vector<vector<vector<ppPoint> > > regions;
 public:
   Mat img; 
 	void init();
@@ -86,11 +98,10 @@ public:
 	~ppMap();
 	vector<vector<int> > map;
 	void createBorder(const vector<ppPoint>& _border);
+  void createRegions(const vector<vector<ppPoint> >& region, int region_tag);
 	void createObstacles(const vector<vector<ppPoint> >& _obstacles); 
 	void addMapBlock(ppMapBlock block);
 	void createMap ();
 	Mat getImage();
 };
 
-bool onRight ( const ppPoint& a,const ppPoint& b, const ppPoint& c);
-bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p );

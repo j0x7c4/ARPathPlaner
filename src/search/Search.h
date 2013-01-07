@@ -134,7 +134,7 @@ class Search{
 				visitedNode.push_back(currentNode);
 				queue.pop();
 				for(int i = 0; i < mapSize; i++){
-					if(map[currentNode.name][i] != 0){
+					if(map[currentNode.name][i] !=0 ){
 						/* Calculate newNode's cost and priority */
 						tmpCost = calCost(currentNode, i);
 						tmpDist = calDist(i);
