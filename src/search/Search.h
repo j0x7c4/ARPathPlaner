@@ -42,7 +42,7 @@ class Node{
 			y = n.y;
 			cost = n.cost;
 			parent = n.parent;
-      return *this;
+      		return *this;
 		}		
 };
 
@@ -65,7 +65,7 @@ class Search{
 		vector<ppMapBlock> blocks;  
 		vector<Node> visitedNode; 	
 		vector< vector<int> > map; // map connected info matrix	
-    vector<vector<Point2i>> exitList;
+    	vector< vector<Point2i> > exitList;
 		// Constructor
 		Search(vector<int> sten, const ppMap& pMap){
 			startEnd = sten;
@@ -83,8 +83,18 @@ class Search{
 		// Function
 		/* Calculate the cost from start to here */
 		double calCost(const Node& curNode, int i){
-			return curNode.cost + sqrt(pow(curNode.x - blocks[i].center.x, 2.0) + pow(curNode.y - blocks[i].center.y, 2.0));	
+			vector<int> lineCenterPoint;
+			double cost = 0, time_1 = 0, time_2 = 0;
+			lineCenterPoint = findLine(blocks[curNode.name], blocks[i]);
+			time_1 = calDist(curNode.x, curNode.y, lineCenterPoint[0], lineCenterPoint[1]) / blocks[curNode.name].base_speed;
+			time_2 = calDist(lineCenterPoint[0], lineCenterPoint[1], blocks[i].center.x, blocks[i].center.y) / blocks[i].base_speed;
+			cost = time_1 + time_2;
+			return cost;
 		}
+		/* Calculate the dist between two points */
+		double calDist(int x_1, int y_1, int x_2, int y_2){
+			return sqrt(pow(x_1 - x_2, 2.0) + pow(y_1 - y_2, 2.0));
+		}	
 		/* Calculate the dist from here to end */
 		double calDist(int i){
 			return sqrt(pow(blocks[i].center.x - blocks[en].center.x, 2.0) + pow(blocks[i].center.y - blocks[en].center.y, 2.0));
@@ -134,7 +144,7 @@ class Search{
 				visitedNode.push_back(currentNode);
 				queue.pop();
 				for(int i = 0; i < mapSize; i++){
-					if(map[currentNode.name][i] !=0 ){
+					if(map[currentNode.name][i] != 0){
 						/* Calculate newNode's cost and priority */
 						tmpCost = calCost(currentNode, i);
 						tmpDist = calDist(i);
@@ -158,7 +168,7 @@ class Search{
 			Point p1, p2, p3;
 			if(st == en){
 				p1 = cvPoint(startEnd[0], startEnd[1]); //startPoint
-        p2 = exitList[en][0]; //EndPoint
+        		p2 = exitList[en][0]; //EndPoint
 				pointPath.push_back(p1); 
 				pointPath.push_back(p2);
 			}
@@ -185,10 +195,10 @@ class Search{
 			}
 			if(st != en){
 				p1 = cvPoint(blocks[path.back()].center.x, blocks[path.back()].center.y);
-        p2 = exitList[en][0]; //EndPoint;
+        		p2 = exitList[en][0]; //EndPoint;
 				pointPath.push_back(p2);
 			}
-      out_path = vector<Point2i>(pointPath);
+      		out_path = vector<Point2i>(pointPath);
 		}
 		
 		/* find the edge between two blocks */

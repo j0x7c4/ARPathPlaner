@@ -12,9 +12,11 @@ using namespace aruco;
 #define bor 1008
 #define en 1000
 #define exi 500
+#define hill 700
+#define river 600
 
 #define MOTION_ENERGY_WINDOW_SIZE 10
-#define MOTION_THRESHOLD 5
+#define MOTION_THRESHOLD 10
 
 #define TEST_VIDEO "test_video_3.avi"
 #define IMG_BORDER "border.jpg"
@@ -22,7 +24,8 @@ using namespace aruco;
 #define IMG_ENTER "start.jpg"
 #define IMG_EXIT "exit.jpg"
 #define IMG_EVIL "tree.jpg"
-
+#define IMG_HILL "hill.jpg"
+#define IMG_RIVER "river.jpg"
 void put_obj(Mat& input, char *name, int x, int y, int size = 80);
 void drawLine(const vector<Point2i>& path, Mat& img);
 double calcEnergy ( const vector<Mat>& clips );
@@ -34,7 +37,7 @@ int motion_state=0;
 int main(int argc,char **argv){
 
   VideoWriter video_writer;
-  VideoCapture cap("test_video_2.avi");// open the default camera
+  VideoCapture cap(1);// open the default camera
 #ifdef RECORD_TEST_VIDEO
   video_writer.open("test_video_2.avi",CV_FOURCC('D','I','V','X'),30,cvSize(800,600),true);
 #endif
@@ -68,12 +71,14 @@ int main(int argc,char **argv){
   vector<Point2f> running_path;
   vector<Marker> Markers;
   vector<Point2f> borders; //border
-  vector<Marker> Obstacles; //obstacle
+  //vector<Marker> Obstacles; //obstacle
   vector<Point2i> route;
   Point2f in_door; //entry and exit
   vector<Point2f> out_doors;
   double energy = 0;
   vector<Mat> energy_images(MOTION_ENERGY_WINDOW_SIZE,Mat());
+  
+  ///start here!!!
   while(cap.read(InImage)){// get a new frame from camera
 #ifdef RECORD_TEST_VIDEO
     video_writer<<InImage;
@@ -104,21 +109,24 @@ int main(int argc,char **argv){
       break;
     }
     vector<ppPoint> ppBorder;
-    vector<vector<ppPoint> > ppObstacles;
+    vector<vector<vector<ppPoint> > >ppRegions(REGION_NUMBER, vector<vector<ppPoint> >());
+    //vector<vector<ppPoint> > ppObstacles;
     vector<int> idx;
     ppMap map(800,600);
     
 
 
     if ( redetect ) {
+      //ppHills.clear();
       borders.clear();
-      Obstacles.clear();
+      //Obstacles.clear();
       out_doors.clear();
       //Ok, let's detect
       MDetector.detect(InImage,Markers,CamParam,MarkerSize);
       //for each marker, draw info and its boundaries in the image
       for (int i=0;i<Markers.size();i++) {
         //cout<<Markers[i]<<endl;
+        vector<ppPoint> object;
         switch(Markers[i].id){
         case bor:
           borders.push_back(Markers[i].getCenter());
@@ -132,8 +140,27 @@ int main(int argc,char **argv){
           out_doors.push_back(Markers[i].getCenter());
           break;
         case obj:
-          Obstacles.push_back(Markers[i]);
+          for(int j=0;j<Markers[i].size();j++){
+            //cout << "(" << Obstacles[i][j].x << "," << Obstacles[i][j].y << ")";
+            object.push_back(ppPoint(Markers[i][j].x, Markers[i][j].y));
+          }
+          ppRegions[REGION_OBSTACLE].push_back(object);
           break;
+        case hill:
+          for(int j=0;j<Markers[i].size();j++){
+            //cout << "(" << Obstacles[i][j].x << "," << Obstacles[i][j].y << ")";
+            object.push_back(ppPoint(Markers[i][j].x, Markers[i][j].y));
+          }
+          ppRegions[REGION_HILL].push_back(object);
+          break;
+        case river:
+           for(int j=0;j<Markers[i].size();j++){
+            //cout << "(" << Obstacles[i][j].x << "," << Obstacles[i][j].y << ")";
+            object.push_back(ppPoint(Markers[i][j].x, Markers[i][j].y));
+          }
+          ppRegions[REGION_RIVER].push_back(object);
+          break;
+
         }
         
       }
@@ -143,10 +170,29 @@ int main(int argc,char **argv){
     //draw markers;
     for ( int i=0 ; i<Markers.size() ; i++ ) {
       Markers[i].draw(InImage,Scalar(0,0,255),2);
+      switch (Markers[i].id) {
+       case bor:
+          break;
+        case en:
+          put_obj(InImage, IMG_ENTER, Markers[i].getCenter().x, Markers[i].getCenter().y, 80);
+          break;
+        case exi:
+          put_obj(InImage, IMG_EXIT , Markers[i].getCenter().x, Markers[i].getCenter().y, 80);
+          break;
+        case obj:
+          put_obj(InImage, IMG_EVIL , Markers[i].getCenter().x, Markers[i].getCenter().y, 80);
+          break;
+        case hill:
+          put_obj(InImage, IMG_HILL, Markers[i].getCenter().x, Markers[i].getCenter().y, 80);
+          break;
+        case river:
+          put_obj(InImage, IMG_RIVER, Markers[i].getCenter().x, Markers[i].getCenter().y, 80);
+          break;
+      }
+      
     }
 
     if(in_door.x!=0 && in_door.y!=0 ) {
-      put_obj(InImage, IMG_ENTER, in_door.x, in_door.y, 80);
       if ( !running ) {
         put_obj(InImage, IMG_TEEMO, in_door.x, in_door.y, 80);
       }
@@ -159,10 +205,10 @@ int main(int argc,char **argv){
       ppBorder.push_back(ppPoint(borders[idx[idx.size()-1-i]].x,borders[idx[idx.size()-1-i]].y));
       //cout << "border_" << i << "(" << borders[idx[idx.size()-1-i]].x << "," << borders[idx[idx.size()-1-i]].y << ")" << endl;
     }
-
+    /*
     for(int i=0;i<Obstacles.size();i++){
       // cout << "Obstacle" << i << ":";
-      put_obj(InImage, IMG_EVIL , Obstacles[i].getCenter().x, Obstacles[i].getCenter().y, 80);
+      
       vector<ppPoint> object;
       for(int j=0;j<Obstacles[i].size();j++){
         //cout << "(" << Obstacles[i][j].x << "," << Obstacles[i][j].y << ")";
@@ -171,16 +217,20 @@ int main(int argc,char **argv){
       ppObstacles.push_back(object);
       //cout << endl;
     }
+    */
     if(out_doors.size()>0 ){
       for ( int i=0 ; i<out_doors.size() ; i++ ) {
         if ( out_doors[i].x == 0 || out_doors[i].y ==0 ) continue;
-        put_obj(InImage, IMG_EXIT , out_doors[i].x, out_doors[i].y, 80);
+        
         //cout << "exit" << "(" << out_door.x << "," << out_door.y << ")" << endl;
       }
     }
-    if(reroute){
+    if(reroute && ppBorder.size() > 2 ){
       map.createBorder(ppBorder);
-      map.createObstacles(ppObstacles);
+      //map.createObstacles(ppObstacles);
+      map.createRegions(ppRegions[REGION_OBSTACLE],REGION_OBSTACLE);
+      map.createRegions(ppRegions[REGION_HILL],REGION_HILL);
+      map.createRegions(ppRegions[REGION_RIVER],REGION_RIVER);
       map.init();
       map.createMap();
       map_image = map.getImage();
@@ -210,7 +260,7 @@ int main(int argc,char **argv){
       reroute = 0;
     }
     drawLine(route,InImage);
-    if ( running ) {
+    if ( running && running_path_idx < running_path.size() ) {
       put_obj(InImage,IMG_TEEMO,running_path[running_path_idx].x,running_path[running_path_idx].y);
       running_path_idx++;
       if ( running_path_idx == running_path.size() )

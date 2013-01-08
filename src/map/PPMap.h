@@ -3,10 +3,16 @@
 #include <math.h>
 using namespace std;
 using namespace cv;
+
 #define VIDEO_WIDTH 1000
 #define VIDEO_HEIGHT 1000
 #define REGION_THRESHOLD 600
-
+#define REGION_NUMBER  4
+#define REGION_OBSTACLE 1
+#define REGION_HILL     2
+#define REGION_RIVER    3
+#define REGION_SPEED_HILL 0.6
+#define REGION_SPEED_RIVER 0.8
 
 class ppPoint{
 public:
@@ -43,6 +49,7 @@ bool isInRegion ( const vector<ppPoint>& region, const ppPoint & p );
 float triangleArea(const ppPoint& a,const ppPoint& b, const ppPoint& c);
 class ppMapBlock {
 public:
+  float base_speed;
   float area;
 	vector<ppPoint> points;
 	ppPoint center;
@@ -76,6 +83,21 @@ public:
     }
 		this->center = ppPoint(x/pts.size(),y/pts.size());
     this->area = triangleArea(pts[0],pts[1],pts[2]) + triangleArea(pts[0],pts[3],pts[2]);
+    switch (flag)
+    {
+    case REGION_HILL:
+      this->base_speed = REGION_SPEED_HILL;
+      break;
+    case REGION_RIVER:
+      this->base_speed = REGION_SPEED_RIVER;
+      break;
+    case REGION_OBSTACLE:
+      this->base_speed = 0;
+      break;
+    default:
+      this->base_speed = 1;
+      break;
+    }
   }
 };
 

@@ -1,10 +1,7 @@
 #include "PPMap.h"
 #include <math.h>
 #define ZERO(x) (fabs(x)<10e-6)
-#define REGION_NUMBER  4
-#define REGION_OBSTACLE 1
-#define REGION_HILL     2
-#define REGION_RIVER    3
+
 
 ppMap::ppMap () {
   ppMap(VIDEO_WIDTH,VIDEO_HEIGHT);
@@ -48,6 +45,10 @@ void ppMap::createObstacles(const vector<vector<ppPoint> >& _obstacles) {
 	}
 }
 void ppMap::createRegions(const vector<vector<ppPoint> >& _regions, int region_tag){
+  regions[region_tag].clear();
+  for ( int i=0 ; i<_regions.size() ; i++ ) {
+		regions[region_tag].push_back(vector<ppPoint>(_regions[i].begin(),_regions[i].end()));
+	}
 }
 void ppMap::addMapBlock ( ppMapBlock block ) {
 	blocks.push_back(block);
@@ -132,6 +133,7 @@ void mergeSmallBlockAsObstacle(vector<ppMapBlock>& blocks, vector<vector<int> >&
       for ( int j=0 ; j<blocks.size() ; j++ ) {
         if ( map[i][j] == 2 && blocks[j].area>REGION_THRESHOLD ) {
           blocks[i].flag = REGION_OBSTACLE;
+          blocks[i].base_speed = 0 ;
           for ( int k=0 ; k<blocks.size() ; k++ ) {
             map[k][i]=map[i][k] = 0;
           }
@@ -169,8 +171,8 @@ bool merge ( const ppMapBlock& t1, const ppMapBlock& t2 , ppMapBlock& block) {
 	}
 	return false;
 }
-void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<int> >& map, vector<ppMapBlock>& blocks ) {
-  int n = triangels.size();
+void mergeTriangles ( const vector<ppMapBlock>& triangles, const vector<vector<int> >& map, vector<ppMapBlock>& blocks ) {
+  int n = triangles.size();
   vector<int> mark(n,0);
   for ( int i=0 ; i<n ; i++ ) {
     if (!mark[i]) {
@@ -178,7 +180,7 @@ void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<i
 			for ( j=i+1 ; j<n; j++ ) {
 				if ( !mark[j] && map[i][j]==1 ) {
 					ppMapBlock block;
-					if ( merge(triangels[i],triangels[j],block) ) {
+					if ( merge(triangles[i],triangles[j],block) ) {
 						mark[j] = 1;
 						blocks.push_back(block);
 						break;
@@ -189,10 +191,10 @@ void mergeTriangles ( const vector<ppMapBlock>& triangels, const vector<vector<i
 				vector<Point2f> convexHullPts;
 				vector<int> idx;
 				for ( int k=0 ; k<3; k++) {
-					convexHullPts.push_back(Point2f(triangels[i].points[k].x,triangels[i].points[k].y));
+					convexHullPts.push_back(Point2f(triangles[i].points[k].x,triangles[i].points[k].y));
 				}
 				convexHull(convexHullPts,idx,true,false);
-				blocks.push_back(ppMapBlock(triangels[i].points[idx[2]],triangels[i].points[idx[1]],triangels[i].points[idx[0]]));
+				blocks.push_back(ppMapBlock(triangles[i].points[idx[2]],triangles[i].points[idx[1]],triangles[i].points[idx[0]],0,triangles[i].flag));
 			}
 		}
   }
@@ -225,7 +227,8 @@ void ppMap::createMap() {
 	for ( int i=0 ; i<tempBlocks.size() ; i++ ) {
 		for ( int j=i+1 ; j<tempBlocks.size() ; j++ ) {
 			if ( isConnected(tempBlocks[i],tempBlocks[j]) ) {
-				if ( tempBlocks[i].flag != tempBlocks[j].flag ) {
+        if ( tempBlocks[i].flag == REGION_OBSTACLE && tempBlocks[j].flag!=REGION_OBSTACLE || 
+          tempBlocks[j].flag == REGION_OBSTACLE && tempBlocks[i].flag!=REGION_OBSTACLE ) {
 					tempMap[i][j] = tempMap[j][i] = 2; //plain and obstecal
 				}
 				else {
@@ -241,12 +244,13 @@ void ppMap::createMap() {
 		blocks[i].tag = i;
 		for ( int j=i+1 ; j<blocks.size() ; j++ ) {
 			if ( isConnected(blocks[i],blocks[j]) ){
-        if (blocks[i].flag==blocks[j].flag ) {
-				  map[i][j] = map[j][i] = 1;
-        }
-        else {
-          map[i][j] = map[j][i] = 2;
-        }
+        if ( blocks[i].flag == REGION_OBSTACLE && blocks[j].flag!=REGION_OBSTACLE || 
+          blocks[j].flag == REGION_OBSTACLE && blocks[i].flag!=REGION_OBSTACLE ) {
+					map[i][j] = map[j][i] = 2; //plain and obstecal
+				}
+				else {
+					map[i][j] = map[j][i] = 1; // plain and plain or  obstecal and obstecal
+				}
 			}
 
 		}
@@ -255,7 +259,7 @@ void ppMap::createMap() {
 	vector<ppMapBlock> plains;
 	vector<ppMapBlock> obstacles;
 	for (int i=0 ; i<blocks.size(); i++ ) {
-		if ( blocks[i].flag ) {
+    if ( blocks[i].flag==REGION_OBSTACLE ) {
 			obstacles.push_back(blocks[i]);
 		}
 		else {
@@ -275,6 +279,7 @@ void ppMap::createMap() {
 		printf("\n");
 	}
   */ 
+
 }
  Mat ppMap::getImage() {
 	 return img.clone();
